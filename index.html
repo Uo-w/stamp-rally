@@ -293,9 +293,7 @@
         const acquiredCount = STAMPS.map(e => localStorage.getItem(`stamp_${e}`)).filter(e => e === "true").length;
         // ② コンプリート判定による演出分岐
         if (acquiredCount === 15) {
-          alert("🎉🎉🎉🎉🎉🎉🎉🎉🎉\nコンプリートおめでとうございます！\nコンピューター室へ景品を取りに来てください！\n🎉🎉🎉🎉🎉🎉🎉🎉🎉");
-        } else if (acquiredCount >= 12) {
-          alert("🎁🎁🎁🎁🎁🎁🎁🎁🎁\n12個以上スタンプ獲得おめでとうございます！\nコンピューター室へ景品を取りに来てください！\n🎁🎁🎁🎁🎁🎁🎁🎁🎁");
+          alert("🎉🎉🎉🎉🎉🎉🎉🎉🎉\nコンプリートおめでとうございます！\nコンピューター室へ景品を取りに来てください！\n🎉🎉🎉🎉🎉🎉🎉🎉🎉\n\n⚠️コンプリートボタンをカメラボタンに戻しました");
         }
 
       } else {
