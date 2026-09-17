@@ -169,7 +169,7 @@
 
   <!-- 【右画面】スタンプラリーエリア -->
   <div id="page-stamp" class="page-content">
-    <button id="start-scan-btn" class="scan-btn" onclick="startScanner()">📷 カメラでQRを読み込む</button>
+    <button id="start-scan-btn" class="scan-btn" onclick="allComplete()">✅ 全スタンプを解放</button>
     <div id="reader" style="display:none;"></div>
 
     <!-- 東館 (旧 東館エリア) -->
@@ -264,20 +264,10 @@
     }
 
     // カメラ起動処理
-    function startScanner() {
-      document.getElementById('reader').style.display = 'block';
-      document.getElementById('start-scan-btn').style.display = 'none';
-
-      html5QrcodeScanner = new Html5Qrcode("reader");
-      html5QrcodeScanner.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        onScanSuccess,
-        onScanError
-      ).catch(err => {
-        alert("カメラの起動に失敗しました。カメラ権限を許可してください。");
-        stopScanner();
-      });
+    function allComplete() {
+      STAMPS.forEach(e => {
+        if (!localStorage.getItem(`stamp_${e}`)) onScanSuccess(e);
+      })
     }
 
     // QRコード読み取り成功時の処理
@@ -296,16 +286,16 @@
         localStorage.setItem("stamp_" + decodedText, "true");
         stopScanner();
         
-        // UI更新 & 獲得数の取得
-        const acquiredCount = updateUI();
+        // UI更新 & 全達成チェック
+        updateUI();
+        const isAllComplete = isAllCompleted();
 
-        // ② コンプリート / 12個以上獲得 / 通常達成のメッセージ分岐
+        const acquiredCount = STAMPS.map(e => localStorage.getItem(`stamp_${e}`)).filter(e => e === "true").length;
+        // ② コンプリート判定による演出分岐
         if (acquiredCount === 15) {
           alert("🎉🎉🎉🎉🎉🎉🎉🎉🎉\nコンプリートおめでとうございます！\nコンピューター室へ景品を取りに来てください！\n🎉🎉🎉🎉🎉🎉🎉🎉🎉");
         } else if (acquiredCount >= 12) {
           alert("🎁🎁🎁🎁🎁🎁🎁🎁🎁\n12個以上スタンプ獲得おめでとうございます！\nコンピューター室へ景品を取りに来てください！\n🎁🎁🎁🎁🎁🎁🎁🎁🎁");
-        } else {
-          alert("スタンプを獲得しました！");
         }
 
       } else {
@@ -324,14 +314,15 @@
       }
     }
 
-    // UIおよびピン・文字表示の更新（戻り値：獲得したスタンプの個数）
-    function updateUI() {
-      let acquiredCount = 0;
+    const isAllCompleted = () => STAMPS.every(v => localStorage.getItem(`stamp_${v}`) === "true");
 
+    // UIおよびピン（未訪問:赤 / 訪問済:緑）の表示更新
+    function updateUI() {
+      if (isAllCompleted()) {
+        document.getElementById("start-scan-btn").textContent = "📷 カメラでQRを読み込む";
+      }
       STAMPS.forEach(boothId => {
-        const isAcquired = localStorage.getItem("stamp_" + boothId) === "true";
-        if (isAcquired) acquiredCount++;
-        
+        const isAcquired = localStorage.getItem("stamp_" + boothId) === "true";        
         // スタンプ枠
         const stampElement = document.getElementById("stamp-" + boothId);
         if (stampElement) {
@@ -352,6 +343,7 @@
       const noticeText = document.getElementById("stamp-notice-text");
       const infoBox = document.getElementById("stamp-info-box");
 
+      const acquiredCount = STAMPS.map(e => localStorage.getItem(`stamp_${e}`)).filter(e => e === "true").length;
       if (countDisplay && noticeText && infoBox) {
         countDisplay.textContent = `現在のスタンプ取得数: ${acquiredCount} / 15個`;
 
@@ -366,8 +358,6 @@
           noticeText.textContent = "12個で景品のお菓子GET! 15個コンプリートすればさらにもう1セット分もらえる！";
         }
       }
-
-      return acquiredCount;
     }
   </script>
 </body>
